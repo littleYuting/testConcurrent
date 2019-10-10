@@ -136,6 +136,7 @@
     ![](https://user-gold-cdn.xitu.io/2019/5/6/16a8b4111b0889be?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
     - jvm 内存模型
+    
     ![](https://user-gold-cdn.xitu.io/2018/12/29/167f8d722f215e49?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
 参考文献
