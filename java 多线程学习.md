@@ -23,14 +23,14 @@
     - 多级反馈队列（集大成）；
 - 上下文切换
     - 概念：CPU从一个进程或线程切换到另一个进程或线程；
-        - 上下文 是指某一时间点 CPU     寄存器和程序计数器的内容；
+        - 上下文 是指某一时间点 CPU 寄存器和程序计数器的内容；
         - 寄存器 是 CPU 内部的数量较少但是速度很快的内存（与之对应的是 CPU 外部相对较慢的 RAM 主内存）；
         - 程序计数器是一个专用的寄存器，用于表明指令序列中 CPU 正在执行的位置，存的值为正在执行的指令的位置或者下一个将要被执行的指令的位置，具体依赖于特定的系统；
     - 步骤：
         - 挂起一个进程，将这个进程在 CPU 中的状态（上下文）存储于内存中的某处；
         - 恢复一个进程，在内存中检索下一个进程的上下文并将其在 CPU 的寄存器中恢复；
         - 跳转到程序计数器所指向的位置（即跳转到进程被中断时的代码行），以恢复该进程；
-    - 类型：1）进程切换 2）线程切换 3）模式（用户/内核）切换 4）地址空间（虚拟/物理）切换
+    - 类型：1）进程切换 2）线程切换 3）模式（用户/内核）切换 4）地址空间（虚拟/物理）切换;
 - 线程的生命周期
 
 ![](https://img-blog.csdn.net/20150309140927553)
@@ -49,6 +49,10 @@
 - 并发（Concurrency）与并行（Parallelism）
     - “并行”概念是“并发”概念的子集，在多任务执行下，并发是针对某一时间段，并行是针对某一时刻；
     - 并发和并行都可以是很多个线程，若可同时被多个 cpu 执行则为并行，若只能被一个 cpu 轮流切换执行则为 并发；
+    - 并发编程三问题：
+        - 原子性：一个或多个操作，不被中断地全部执行 or 不执行；
+        - 可见性：多个线程访问共享变量，一个线程的修改能被其他线程立刻看到；
+        - 有序性：程序的执行顺序按照代码的先后顺序执行；（指令重排）
 - 同步与异步
     -  同步与异步，重点在于消息通知的方式（等待；轮训/被窗口通知）;
     -  同步：发送一个请求,等待返回,然后再发送下一个请求；
@@ -56,6 +60,11 @@
     -  同步可避免死锁，异步可提高并发执行的效率；
 - 阻塞与非阻塞
     - 阻塞与非阻塞，重点在于等消息时候的行为（挂起/非挂起）；
+- jvm 内存模型
+    - Java内存模型规定所有的变量都是存在主存当中（like 物理内存），每个线程都有自己的工作内存（like cpu 高速缓存）；
+    - 线程对变量的所有操作都必须在工作内存中进行，而不能直接对主存进行操作；
+    - 每个线程不能访问其他线程的工作内存；
+    ![](https://user-gold-cdn.xitu.io/2018/12/29/167f8d722f215e49?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 - 补充
     - 进程的同步、互斥与通信的区别
         - 进程的互斥与同步概念是在并发过程中存在的概念，目的是平衡竞争与协作的关系；
@@ -74,6 +83,14 @@
     - 实现 Runnable 接口
     - 实现 Callable 接口
     - 使用 线程池（类型、优点、实现）
+    - CachedThreadPool:可缓存的线程池，该线程池中没有核心线程，非核心线程的数量为Integer.max_value，就是无限大，当有需要时创建线程来执行任务，没有需要时回收线程，适用于耗时少，任务量大的情况。
+
+ScheduledThreadPool:周期性执行任务的线程池，按照某种特定的计划执行线程中的任务，有核心线程，但也有非核心线程，非核心线程的大小也为无限大。适用于执行周期性的任务。
+
+SingleThreadPool:只有一条线程来执行任务，适用于有顺序的任务的应用场景;
+
+FixedThreadPool:定长的线程池，有核心线程，核心线程的即为最大的线程数量，没有非核心线程;
+
 - 状态转换
     - 运行 <-> 阻塞
     
@@ -92,25 +109,47 @@
       线程抛出一个未捕获的 Exception 或者 Error;  
       直接调用该线程的 stop 方法来结束线程;
       
-- 实例变量和线程安全
-- synchronized
-    - 保证同一时刻最多只有一个线程执行该段代码， 防止多线程干扰和内存一致性错误；
-    - 若一个对象变量对多个线程可见，则对其所有读写均通过同步方法完成；
-    - 分类
-        - 对象锁：java 中每个对象均有一个 monitor 对象，即为 java 对象的锁，通常称为“内置锁”或“对象锁”，类对象可有多个，相应地对象锁也有多个，具有独立性，互不干扰；【synchronized(this|object){} 代码块和 synchronized 修饰非静态方法】
-        - 类锁：每个类只有一个 class 对象，所以每个类只有一个类锁；【synchronized(类.class){} 代码块和 synchronized 修饰静态方法】
-    - 使用
-        - 两个线程访问一个对象的普通同步方法：需等待锁的释放；
-        - 两个线程访问两个对象的普通同步方法：互相独立；
-        - 两个线程访问静态同步方法：针对该类的所有对象锁一致，同步有效；
-        - 两个线程分别访问普通同步方法和非同步方法：同步无效；
-        - 两个线程分别访问一个对象的不同同步方法：锁一致，同步生效；
-        - 两个线程分别访问静态同步和普通同步方法： 锁不同，同步不生效；
-        - 抛出异常后，释放锁；
-    - 补充
-        - synchronized 关键字不能继承；
-        - 在定义接口方法时不能使用 synchronized 关键字；
-        - 构造方法不能使用 synchronized 关键字，但可以使用 synchronized 代码块来进行同步；
+- 线程安全（原子性、可见性、有序性）
+    - synchronized 关键字
+        - 保证同一时刻最多只有一个线程执行该段代码， 防止多线程干扰和内存一致性错误；
+        - 若一个对象变量对多个线程可见，则对其所有读写均通过同步方法完成；
+        - 分类
+            - 对象锁：java 中每个对象均有一个 monitor 对象，即为 java 对象的锁，通常称为“内置锁”或“对象锁”，类对象可有多个，相应地对象锁也有多个，具有独立性，互不干扰；【synchronized(this|object){} 代码块和 synchronized 修饰非静态方法】
+            - 类锁：每个类只有一个 class 对象，所以每个类只有一个类锁；【synchronized(类.class){} 代码块和 synchronized 修饰静态方法】
+        - 使用
+            - 两个线程访问一个对象的普通同步方法：需等待锁的释放；
+            - 两个线程访问两个对象的普通同步方法：互相独立；
+            - 两个线程访问静态同步方法：针对该类的所有对象锁一致，同步有效；
+            - 两个线程分别访问普通同步方法和非同步方法：同步无效；
+            - 两个线程分别访问一个对象的不同同步方法：锁一致，同步生效；
+            - 两个线程分别访问静态同步和普通同步方法： 锁不同，同步不生效；
+            - 抛出异常后，释放锁；
+        - 补充
+            - synchronized 关键字不能继承；
+            - 在定义接口方法时不能使用 synchronized 关键字；
+            - 构造方法不能使用 synchronized 关键字，但可以使用 synchronized 代码块来进行同步；
+    - Lock 关键字 [详见](https://juejin.im/post/5ab9a5b46fb9a028ce7b9b7e)
+        - 产生背景（synchronized 存在的问题）
+            - 一个线程锁定过程中若发生阻塞，下一个线程只能被动等待，lockInterruptibly() 方法下，当线程未获取到锁资源，可以响应中断；
+            - 多线程读写冲突，写操作互斥，读操作并发；
+            - lock 可提供线程是否获得锁的信息；
+        - lock 与 synchronized 的区别
+            - synchronized 是 java 语言内置的， lock 是一个可实现同步访问的接口类；
+            - lock 需手动释放锁，抛出异常后，锁不会自动释放；
+            - 实际使用中 synchronized 若能满足需要，建议使用synchronized
+        - ReentrankLock
+            - [ReentrankLock 源码解析](https://juejin.im/post/5b7235e951882560ed075893)
+            - [condition 接口](https://www.cnblogs.com/dolphin0520/p/3920385.html) 【选择性通知】
+                - 基本方法： 
+                - Condition 依赖于 Lock 接口，生成一个 Condition 的基本代码是 lock.newCondition() ；
+                - 调用  Condition 的 await() 和 signal()方法，都必须在 lock 保护之内，就是说必须在 lock.lock() 和 lock.unlock 之间才可以使用；
+                - 一个 Lock 对象中可以创建多个 Condition 实例（即对象监视器），线程对象可以注册在指定的 Condition 中；
+                - [源码分析](https://blog.csdn.net/fuyuwei2015/article/details/72602182)
+            - [ReentrankLock 与 synchronized 的区别](https://blog.csdn.net/vernonzheng/article/details/8288251)
+        - ReentrantReadWriteLock 和 ReentrantLock的区别
+        - 
+    - volatile 关键字
+        - 轻量级同步，保证线程间的可见性，但不能保证线程操作的原子性，如自增操作； 
 - 常用方法
 - 补充：
     - run（）与 start（）
@@ -131,20 +170,20 @@
     | wait | Object 公共方法 | Yes | 等待队列 | IllegalMonitorStateException+InterruptedException| 
     | notify/notifyAll | Object 公共方法 | -- | 同步队列 | IllegalMonitorStateException| 
     | join | Thread 公共方法 | No | 阻塞 | InterruptedException | 
-    | yield | Thread 公共方法 | No | 可执行态 | 无|   
-    
+    | yield | Thread 公共方法 | No | 可执行态 | 无| 
     ![](https://user-gold-cdn.xitu.io/2019/5/6/16a8b4111b0889be?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
-    - jvm 内存模型
-    
-    ![](https://user-gold-cdn.xitu.io/2018/12/29/167f8d722f215e49?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+    - nofityAll() 方法能够唤醒所有正在等待该对象的 monitor 的线程，notify() 和 notifyAll() 方法只是唤醒等待该对象的monitor的线程，并不决定哪个线程能够获取到monitor;
+
+ 
 
 参考文献
 
-1. [Java中的进程与线程（总结篇）](https://www.cnblogs.com/WuXuanKun/p/6259965.html)  
-2. [啃碎并发（三）：Java线程上下文切换](https://juejin.im/post/5b10e53b6fb9a01e5b10e9be)  
-3. [并行与并发](https://www.zhihu.com/question/33515481)  
-4. [Java中的进程与线程（总结篇）](https://www.cnblogs.com/WuXuanKun/p/6259965.html)
-5. [线程篇2：[- sleep、wait、notify、join、yield -]](https://juejin.im/post/5ccfc04051882540ab167f86)  
-6. [线程篇3：[-synchronized-]](https://juejin.im/post/5c27207ee51d4558873c693d)  
-7. [java 之 syncronized 详解](https://juejin.im/post/594a24defe88c2006aa01f1c)
+[Java中的进程与线程（总结篇）](https://www.cnblogs.com/WuXuanKun/p/6259965.html)  
+[啃碎并发（三）：Java线程上下文切换](https://juejin.im/post/5b10e53b6fb9a01e5b10e9be)  
+[并行与并发](https://www.zhihu.com/question/33515481)  
+[Java中的进程与线程（总结篇）](https://www.cnblogs.com/WuXuanKun/p/6259965.html)
+[线程篇2：[- sleep、wait、notify、join、yield -]](https://juejin.im/post/5ccfc04051882540ab167f86)  
+[线程篇3：[-synchronized-]](https://juejin.im/post/5c27207ee51d4558873c693d)  
+[java 之 syncronized 详解](https://juejin.im/post/594a24defe88c2006aa01f1c)  
+[Java并发编程：volatile关键字解析](https://www.cnblogs.com/dolphin0520/p/3920373.html)
