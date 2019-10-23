@@ -10,6 +10,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class testConsumerAndProvider {
+    /** 前言_生产者&消费者模型
+     * 1） 定义：基于等待/通知机制，描述的是有一块缓冲区作为仓库，生产者可将产品放入仓库，消费者可以从仓库中取出产品；
+     * 2）规则：两个排斥(生产时不能消费，消费时不能生产)；两个等待(缓冲区为空时不能消费，缓冲区满时不能生产)；
+     * 3）优点： 解耦（公共缓冲区）； 通过速度平衡实现最优解；
+     */
     private int queue_size = 4;
     private PriorityQueue<Integer> queue = new PriorityQueue<>(queue_size);
 
