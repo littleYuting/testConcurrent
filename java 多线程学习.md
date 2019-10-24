@@ -146,8 +146,12 @@ FixedThreadPool:定长的线程池，有核心线程，核心线程的即为最�
                 - 一个 Lock 对象中可以创建多个 Condition 实例（即对象监视器），线程对象可以注册在指定的 Condition 中；
                 - [源码分析](https://blog.csdn.net/fuyuwei2015/article/details/72602182)
             - [ReentrankLock 与 synchronized 的区别](https://blog.csdn.net/vernonzheng/article/details/8288251)
-        - ReentrantReadWriteLock 和 ReentrantLock的区别
-        - 
+        - [ReentrantReadWriteLock 和 ReentrantLock的区别](https://juejin.im/post/5b9df6015188255c8f06923a)
+            - 相同点：均使用了实现 AbstractQueuedSynchronizer接口的 Sync；
+            - 不同点：ReentrantReadWriteLock 使用了两个锁分别实现了 AQS；
+            - ReentrantReadWriteLock.WriteLock 和 ReentrantLock一样，采用独占锁，区别在于 WriteLock 需要同时考虑是否有其他读锁或写锁占用，而ReentrankLock 只需考虑自身是否被占用；
+            - ReentrantReadWriteLock.ReadLock 和 Semaphore 一样，采用共享锁，读锁只要没有写锁占用且不超过最大获取数量都可尝试获取；
+            
     - volatile 关键字
         - 轻量级同步，保证线程间的可见性，但不能保证线程操作的原子性，如自增操作； 
 - 常用方法
@@ -171,6 +175,7 @@ FixedThreadPool:定长的线程池，有核心线程，核心线程的即为最�
     | notify/notifyAll | Object 公共方法 | -- | 同步队列 | IllegalMonitorStateException| 
     | join | Thread 公共方法 | No | 阻塞 | InterruptedException | 
     | yield | Thread 公共方法 | No | 可执行态 | 无| 
+    
     ![](https://user-gold-cdn.xitu.io/2019/5/6/16a8b4111b0889be?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
     - nofityAll() 方法能够唤醒所有正在等待该对象的 monitor 的线程，notify() 和 notifyAll() 方法只是唤醒等待该对象的monitor的线程，并不决定哪个线程能够获取到monitor;
